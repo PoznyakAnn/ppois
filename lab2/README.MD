@@ -117,34 +117,7 @@ pip install PyQt6
 python main.py
 ```
 
-## 📸 Скриншоты
-_(Добавьте скриншоты интерфейса)_
 
-## 📊 Диаграмма классов
-```plantuml
-@startuml
-class TournamentModel {
-  + db_name: str
-  + load_records_from_db()
-  + add_record()
-}
-
-class TournamentView {
-  - table: QTableWidget
-  - tree: QTreeWidget
-  + update_table()
-}
-
-class TournamentController {
-  - model: TournamentModel
-  - view: TournamentView
-  + add_record_to_db()
-}
-
-TournamentView --> TournamentController
-TournamentController --> TournamentModel
-@enduml
-```
 
 ## 💡 Особенности реализации
 - 🔍 Гибкий поиск по разным критериям
