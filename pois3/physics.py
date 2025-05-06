@@ -1,43 +1,43 @@
+import pygame
 import math
+from .physics import PhysicsObject
 from .config import *
 
-class PhysicsObject:
-    def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.vx = 0
-        self.vy = 0
+class Player(PhysicsObject):
+    def __init__(self, x, y, color, team):
+        super().__init__(x, y, PLAYER_RADIUS)
+        self.color = color
+        self.team = team
+        self.image = None
+        self.load_image()
+        self.kick_charge = 0
 
-    def update_position(self):
-        self.x += self.vx
-        self.y += self.vy
-        speed = math.hypot(self.vx, self.vy)
-        if speed < 0.1:
-            self.vx = self.vy = 0
-        else:
-            self.vx *= FRICTION
-            self.vy *= FRICTION
+    def load_image(self):
+        self.image = pygame.Surface((PLAYER_RADIUS*2, PLAYER_RADIUS*2), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, self.color, (PLAYER_RADIUS, PLAYER_RADIUS), PLAYER_RADIUS)
 
-        # Столкновения со стенами
-        if self.x - self.radius <= LEFT_BOUND:
-            self.x = LEFT_BOUND + self.radius
-            self.vx *= -ELASTICITY
-        elif self.x + self.radius >= RIGHT_BOUND:
-            self.x = RIGHT_BOUND - self.radius
-            self.vx *= -ELASTICITY
+    def draw(self, screen):
+        rect = self.image.get_rect(center=(self.x, self.y))
+        screen.blit(self.image, rect)
 
-        if self.y - self.radius <= TOP_BOUND:
-            self.y = TOP_BOUND + self.radius
-            self.vy *= -ELASTICITY
-        elif self.y + self.radius >= BOTTOM_BOUND:
-            self.y = BOTTOM_BOUND - self.radius
-            self.vy *= -ELASTICITY
+    def charge_kick(self):
+        self.kick_charge = min(self.kick_charge + 1, 20)
 
-    def check_collision(self, other):
-        dx, dy = other.x - self.x, other.y - self.y
-        return math.hypot(dx, dy) < self.radius + other.radius
+    def kick(self, tx, ty):
+        dx = tx - self.x
+        dy = ty - self.y
+        dist = math.hypot(dx, dy)
+        if dist == 0:
+            return
+        nx, ny = dx / dist, dy / dist
+        self.vx += nx * self.kick_charge
+        self.vy += ny * self.kick_charge
+        self.kick_charge = 0
 
-    def resolve_collision(self, other):
-        # логика столкновений
-        ...
+class Ball(PhysicsObject):
+    def __init__(self, x, y):
+        super().__init__(x, y, BALL_RADIUS)
+        self.color = (255, 255, 255)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
